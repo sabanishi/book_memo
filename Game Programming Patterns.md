@@ -1,5 +1,10 @@
 # Game Programming Patterns
 
+## Unity以外で実装する必要性が出た時に読み返した方が良い章
+
+- 3章、8章、9章
+
+
 ## 1章　アーキテクチャ、実行速度、ゲーム
 
 ### 1.1
@@ -219,3 +224,65 @@ public class User{
 
 - 低レイヤーでのグラフィック処理について
 - 書き込み用、読み込み用のバッファを作り、片方が読み込みをやっている間にもう片方が書き込むを行うようにする
+
+## 9章 ゲームループ
+
+- 基本的なゲームループ
+
+```c
+while(true){
+  processInput(); //前回呼び出された以降に生じた入力の処理
+  update(); //モデルの更新処理
+  render(); //描画処理
+}
+```
+
+## 10章 更新メソッド
+
+- コードのアーキテクチャを説明するのに、「詰め込まれた」という言葉が相応しく感じるならば、そのコードには問題が生じている可能性が高い
+
+### リストの更新作業中に追加・削除を行う
+
+- 追加
+  - 一番末尾に追加すれば一般的には問題ない
+  - 追加したフレーム中に更新したくない場合は、更新開始時の要素数のみを更新対象にするようにすれば良い
+
+```c#
+private List<Entity> _targets; //更新対象となるリスト
+
+//毎フレーム呼ばれる関数
+public void Update(){
+  var targetNum = _targets.Count;
+  for(int i=0;i<_targetNum;i++>){
+    _targets[i].Update();
+
+    ...
+
+    //リストに追加
+    var entity = new Entity();
+    _targets.Add(entity;)
+  }
+}
+```
+
+- 削除
+  - for文を回している最中には削除せず、チェックフラグだけ立てておき、回し終わった後に削除する
+
+```c#
+private List<Entity> _targets;
+
+public void Update(){
+  var deleteList = new List<Entity>();
+  foreach(var entity in _targets){
+    if(entity.IsDelete()){
+      //削除フラグをたてる
+      deleteList.Add(entity);
+    }
+  }
+
+  //ループを回し終わった後に、フラグがついているもののみをまとめて削除する
+  foreach(var entity in deleteList){
+    _targets.Remove(entity);
+  }
+}
+```
