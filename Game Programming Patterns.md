@@ -2,8 +2,7 @@
 
 ## Unity以外で実装する必要性が出た時に読み返した方が良い章
 
-- 3章、8章、9章、(11章)、
-
+- 3章、8章、9章、(11章)
 
 ## 1章　アーキテクチャ、実行速度、ゲーム
 
@@ -400,4 +399,56 @@ class RenderingComponent{
 
 - オブザーバーパターンの非同期版
 - チュートリアルとかに使っても良いかも
+
+## 16章 サービスロケータ
+
+- サウンド出力機構のような、どこからでも呼び出せるようにしたいコンポーネントはシングルトンにする
+  - しかし、シングルトンクラスは具象クラスであり、それを直接公開するのは事故の元
+  - そこで**サービスロケータ**使う
+
+- これを使えば、ゲーム起動中にサービスの変更ができる
+  - チュートリアル中の間は走って欲しくない処理をNullObjectにする事とかもできそう
+
+- 具象クラスの割り当てについて
+
+- 案1
+  - プラットフォーム依存コンパイルを
+  - 高速な代わりに起動時に切り替えられない
+
+```c#
+public class Locator{
+#if UNITY_DEBUG
+  public static DebugService service;
+#else
+  public static NormalService service;
+#endif
+}
+```
+
+- 案2
+  - 初期化時に設定する
+    - 起動時に切り替えられる
+    - 複雑
+
+```c#
+public class Locator{
+  public static Service serice;
+
+  public static void Initialize(Service newService){
+    service = newService;
+  }
+}
+
+public class Initializer{
+  public static void main(int args, int[] argv){
+    Locator.Initialize(new NormalService());
+  }
+}
+```
+
+- [参考](https://qiita.com/ozaki_shinya/items/9eb0f827caa6a4108888)
+
+## 17章 データ局所化
+
+- CPUは、あるメモリの内容が必要になったら、その後ろもまとめてfetchしてくる性質を持つ
 
